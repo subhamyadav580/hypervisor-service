@@ -3,8 +3,8 @@ INSERT INTO organizations (organization_id, name, invite_code)
 VALUES (:organization_id, :name, :invite_code);
 
 -- CreateUser
-INSERT INTO users (user_id, username, hashed_password) 
-VALUES (:user_id, :username, :hashed_password);
+INSERT INTO users (user_id, username, hashed_password, role) 
+VALUES (:user_id, :username, :hashed_password, :role);
 
 
 -- FecthOrganizationByInviteCode
@@ -27,7 +27,7 @@ VALUES (:deployment_id, :user_id, :cluster_id, :image_path, :required_cpu, :requ
 
 
 -- GetUserDetails
-SELECT user_id, username, hashed_password, organization_id from users where username = :username;
+SELECT user_id, username, hashed_password, role, organization_id from users where username = :username;
 
 
 -- GetClusterDetails

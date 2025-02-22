@@ -19,13 +19,14 @@ def CreateOrganization(organization):
     return params["invite_code"]
 
 
-def CreateUser(username, password):
-    print("Userna,e", username, password)
+def CreateUser(username, password, role):
+    print("Username", username, password, role)
     query = get_query_from_sql_file("CreateUser")
     hashed_password = pwd_context.hash(password)
     params = {
         "user_id": str(uuid.uuid4()),
         "username": username,
+        "role": role,
         "hashed_password": hashed_password
     }
     print("Query", params)
@@ -61,9 +62,10 @@ def LoginUser(username, password):
         username = user_record["username"]
         hashed_password = user_record["hashed_password"]
         organization_id = user_record.get("organization_id", "")
+        role = user_record["role"]
         if not pwd_context.verify(password, hashed_password):
             return {"is_authorized": False}
-        access_token = create_access_token({"user_id": user_id, "organization_id": organization_id})
+        access_token = create_access_token({"user_id": user_id, "organization_id": organization_id, "role": role})
         return {"access_token": access_token, "token_type": "bearer", "is_authorized": True}
     else:
         return {"is_authorized": False}

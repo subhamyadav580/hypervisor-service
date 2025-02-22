@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS users (
     user_id varchar(255) PRIMARY KEY, 
     username TEXT UNIQUE NOT NULL,
     hashed_password TEXT NOT NULL,
+    role TEXT NOT NULL CHECK (role IN ('admin', 'developer', 'viewer')),
     organization_id varchar(255),
     FOREIGN KEY (organization_id) REFERENCES organizations (organization_id)
 );

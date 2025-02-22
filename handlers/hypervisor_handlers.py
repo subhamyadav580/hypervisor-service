@@ -36,8 +36,9 @@ async def register(body: RegisterUserRequest):
     print("body:: ", body)
     username = body.username
     password = body.password
+    role= body.role
     try:
-        username = CreateUser(username, password)
+        username = CreateUser(username, password, role)
         print("username:: ", username)
         if not username:
             raise HTTPException(status_code=500, detail="User registration failed")
@@ -125,8 +126,11 @@ async def create_cluster(body: CreateClusterRequest, auth_data: dict = Depends(v
     try:
         user_id = auth_data.get("user_id")
         organization_id = auth_data.get("organization_id")
+        role = auth_data.get("role")
         if not user_id or not organization_id:
             raise HTTPException(status_code=401, detail="Unauthorized request")
+        if role != 'admin':
+            raise HTTPException(status_code=401, detail="Unauthorized request: Only admin can create cluster.")
         is_success, cluster_id = CreateCluster(body, user_id, organization_id)
         if not is_success:
             raise HTTPException(status_code=500, detail="Failed to create cluster")
@@ -151,8 +155,11 @@ async def create_deployment(body: CreateDeploymentRequest, auth_data: dict = Dep
     """
     try:
         user_id = auth_data.get("user_id")
+        role = auth_data.get("role")
         if not user_id:
             raise HTTPException(status_code=401, detail="Unauthorized request")
+        if role not in ['admin', 'developer']:
+            raise HTTPException(status_code=401, detail="Unauthorized request: Only admin and developer can deploy.")
         is_success, deployment_id = CreateDeployment(body, user_id)
         if not is_success:
             raise HTTPException(status_code=500, detail="Failed to create deployment")
