@@ -39,13 +39,13 @@ cd hypervisor-service
 
 #### Step: 2 Build Image
 ```bash
-docker build -t hypervisor-service .
+docker-compose build
 ```
 
 
 #### Step: 3 Start the service
 ```bash
-docker run -d -p 8000:8000 --name hypervisor-service-container hypervisor-service
+docker-compose up -d
 ```
 
 ### Authentication Workflow
