@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+jwt
+passlib
+bcrypt
+httpx
+pytest
