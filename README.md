@@ -21,6 +21,10 @@ This project implements user authentication, organization management, cluster cr
 4. Deployment Management
 
 * Deployments are created with resource allocation.
+* Automatic resource allocation
+* Queue management for pending deployments
+* Priority-based deployment scheduling
+* Preemption support for high-priority workloads
 
 * Includes a priority-based queuing system.
 
@@ -156,6 +160,11 @@ Sample Response
 {"message":"Deployment added to queue","deployment_id":"bd86c8e6-d210-419f-b1b5-4524f3e16b68"}
 ```
 
+### UML Diagram of DB
+<img src="db_tables.png">
 
+### UML Diagram of the service
+
+<img src="service_uml.png">
 
 
