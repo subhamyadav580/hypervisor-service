@@ -8,5 +8,5 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60  # Token expires in 1 hour
 
 
-REDIS_HOST = "localhost"
+REDIS_HOST = "redis" #if using docker redis inside docker then user `redis` as host if not then `localhost`
 REDIS_PORT = 6379
