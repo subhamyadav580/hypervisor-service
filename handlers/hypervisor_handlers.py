@@ -15,6 +15,8 @@ from services.deployment_service import (
 
 from services.auth import verify_token
 import logging
+from starlette.responses import JSONResponse
+
 
 
 # Initialize Logger
@@ -41,12 +43,12 @@ async def register(body: RegisterUserRequest):
         username = CreateUser(username, password, role)
         print("username:: ", username)
         if not username:
-            raise HTTPException(status_code=500, detail="User registration failed")
-        return {"message": "success", "username": username}
+            return JSONResponse(status_code=500, content={"message": "User registration failed"})
+        return {"message": "user successfully created", "username": username}
 
     except Exception as e:
         logger.error(f"Error registering user: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+        return JSONResponse(status_code=500, content={"message": f"Error registering user: {str(e)}"})
 
 @router.post("/login")
 def login(user: LoginUserRequest):
@@ -62,11 +64,11 @@ def login(user: LoginUserRequest):
     try:
         response = LoginUser(user.username, user.password)
         if not response or not response.get("is_authorized"):
-            raise HTTPException(status_code=400, detail="Invalid credentials")
+            return JSONResponse(status_code=400, content={"message": "Invalid credentials"})
         return response
     except Exception as e:
         logger.error(f"Login failed for user {user.username}: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+        return JSONResponse(status_code=500, content={"message": f"Login failed for user {user.username}: {str(e)}"})
 
 
 
@@ -84,11 +86,11 @@ async def create_organization(body: CreateOrganizationRequest):
     try:
         invite_code = CreateOrganization(body.name)
         if not invite_code:
-            raise HTTPException(status_code=500, detail="Failed to create organization")
-        return {"message": "success", "invite_code": invite_code}
+            return JSONResponse(status_code=500, content={"message": "Failed to create organization"})
+        return {"message": "organization created successfully", "invite_code": invite_code}
     except Exception as e:
         logger.error(f"Error creating organization: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+        return JSONResponse(status_code=500, content={"message": f"Error creating organization: {str(e)}"})
 
 
 @router.post("/join_organization")
@@ -105,11 +107,11 @@ async def join_organization(body: JoinOrganizationRequest):
     try:
         success = JoinOrganization(body.username, body.invite_code)
         if not success:
-            raise HTTPException(status_code=400, detail="Invalid invite code or user does not exist")
-        return {"message": "success"}
+            return JSONResponse(status_code=400, content={"message": "Invalid invite code or user does not exist"})
+        return {"message": "you have successfully joined the organization"}
     except Exception as e:
         logger.error(f"Error joining organization: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+        return JSONResponse(status_code=500, content={"message": f"Error joining organization: {str(e)}"})
     
 @router.post("/create_cluster")
 async def create_cluster(body: CreateClusterRequest, auth_data: dict = Depends(verify_token)):
@@ -128,16 +130,16 @@ async def create_cluster(body: CreateClusterRequest, auth_data: dict = Depends(v
         organization_id = auth_data.get("organization_id")
         role = auth_data.get("role")
         if not user_id or not organization_id:
-            raise HTTPException(status_code=401, detail="Unauthorized request")
+            return JSONResponse(status_code=401, content={"message": "Unauthorized request"})
         if role != 'admin':
-            raise HTTPException(status_code=401, detail="Unauthorized request: Only admin can create cluster.")
+            return JSONResponse(status_code=401, content={"message": "Unauthorized request: Only admin can create cluster."})
         is_success, cluster_id = CreateCluster(body, user_id, organization_id)
         if not is_success:
-            raise HTTPException(status_code=500, detail="Failed to create cluster")
-        return {"message": "success", "cluster_id": cluster_id}
+            return JSONResponse(status_code=500, content={"message": "Failed to create cluster"})
+        return {"message": "cluster has been created successfully", "cluster_id": cluster_id}
     except Exception as e:
         logger.error(f"Error creating cluster: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+        return JSONResponse(status_code=500, content={"message":f"Error creating cluster: {str(e)}"})
 
 
 
@@ -157,13 +159,13 @@ async def create_deployment(body: CreateDeploymentRequest, auth_data: dict = Dep
         user_id = auth_data.get("user_id")
         role = auth_data.get("role")
         if not user_id:
-            raise HTTPException(status_code=401, detail="Unauthorized request")
+            return JSONResponse(status_code=401, content={"message": "Unauthorized request"})
         if role not in ['admin', 'developer']:
-            raise HTTPException(status_code=401, detail="Unauthorized request: Only admin and developer can deploy.")
+            return JSONResponse(status_code=401, content={"message":"Unauthorized request: Only admin and developer can deploy."})
         is_success, deployment_id = CreateDeployment(body, user_id)
         if not is_success:
-            raise HTTPException(status_code=500, detail="Failed to create deployment")
+            return JSONResponse(status_code=500, content={"message":"Failed to create deployment"})
         return {"message": "Deployment added to queue", "deployment_id": deployment_id}
     except Exception as e:
         logger.error(f"Error creating deployment: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+        return JSONResponse(status_code=500, content={"message": f"Error creating deployment: {str(e)}"})

@@ -9,6 +9,7 @@ This project implements user authentication, organization management, cluster cr
 
 * Register & login users securely with JWT.
 * Passwords are hashed using bcrypt.
+* Users have a specific role (`admin`, `developer`, `viewer`)
 
 2. Organization Management
 
@@ -17,19 +18,19 @@ This project implements user authentication, organization management, cluster cr
 3. Cluster Management
 
 * Users can create clusters with fixed resources (RAM, CPU, GPU).
+* Only users with `admin` role can create new clusters.
 
 4. Deployment Management
 
 * Deployments are created with resource allocation.
+* Only users having `admin` and`developer` role can create deployment.
 * Automatic resource allocation
 * Queue management for pending deployments
 * Priority-based deployment scheduling
 * Preemption support for high-priority workloads
-
 * Includes a priority-based queuing system.
 
 5. JWT-Based Security
-
 * Protect API routes with authentication.
 
 
@@ -65,7 +66,7 @@ curl --location --request GET 'http://localhost:8000/create_organization' \
 ```
 Sample Response
 ```bash
-{"message":"success","invite_code":"U4wwp2b3SZ"}
+{"message":"organization created successfully","invite_code":"4wfvuKqjhZ"}
 ```
 
 #### Register a User
@@ -74,13 +75,14 @@ Sample Request
 curl --location 'http://localhost:8000/register' \
 --header 'Content-Type: application/json' \
 --data-raw '{
-   "username" : "test_user",
-   "password": "test@12345"
+   "username" : "shubham",
+   "password": "test@12345",
+   "role": "admin"
 }'
 ```
 Sample Response
 ```bash
-{"message":"success","username":"test_user"}
+{"message":"user successfully created","username":"shubham"}
 ```
 
 
@@ -92,14 +94,14 @@ Sample Request
 curl --location 'http://localhost:8000/join_organization' \
 --header 'Content-Type: application/json' \
 --data '{
-    "invite_code": "U4wwp2b3SZ",
-    "username": "test_user"
+    "invite_code": "4wfvuKqjhZ",
+    "username": "shubham"
 }'
 ```
 
 Sample Response
 ```bash
-{"message":"success"}
+{"message":"you have successfully joined the organization"}
 ```
 
 
@@ -110,13 +112,13 @@ Sample Request
 curl --location 'http://localhost:8000/login' \
 --header 'Content-Type: application/json' \
 --data-raw '{
-   "username" : "test_user",
+   "username" : "shubham",
    "password": "test@12345"
 }'
 ```
 Sample Response
 ```bash
-{"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiY2FjMzNmNGYtNzhkNy00ZDEyLWIxYTAtOWQ2ZGY2ODIyMjJlIiwib3JnYW5pemF0aW9uX2lkIjoiYzg5NmJiYzktNTk0MC00MjA3LTk3ZmEtZmYzYjhhZDlkNjVmIiwiZXhwIjoxNzQwMjcxNjY2fQ.-K02PGV8xkrCSTPkihud2Tdhe2k5s5NsHpecAX23W1Y","token_type":"bearer","is_authorized":true}
+{"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNGZjYzEzODctYmM5Ni00YTg5LTk3ODQtNGNkNDFlMjNjNDUxIiwib3JnYW5pemF0aW9uX2lkIjoiNTk3ODU3NDItMzk3OS00Y2I2LTgyYmEtMTVmODdjMGVkYTczIiwicm9sZSI6ImFkbWluIiwiZXhwIjoxNzQwMzE0ODcxfQ.QdQ5tu7njYdKVd3EVv8jAb63EjT91kjril6FBt7CTNU","token_type":"bearer","is_authorized":true}
 ```
 
 
@@ -124,7 +126,7 @@ Sample Response
 Sample Request
 ```bash
 curl --location 'http://localhost:8000/create_cluster' \
---header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiY2FjMzNmNGYtNzhkNy00ZDEyLWIxYTAtOWQ2ZGY2ODIyMjJlIiwib3JnYW5pemF0aW9uX2lkIjoiYzg5NmJiYzktNTk0MC00MjA3LTk3ZmEtZmYzYjhhZDlkNjVmIiwiZXhwIjoxNzQwMjcxNjY2fQ.-K02PGV8xkrCSTPkihud2Tdhe2k5s5NsHpecAX23W1Y' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNGZjYzEzODctYmM5Ni00YTg5LTk3ODQtNGNkNDFlMjNjNDUxIiwib3JnYW5pemF0aW9uX2lkIjoiNTk3ODU3NDItMzk3OS00Y2I2LTgyYmEtMTVmODdjMGVkYTczIiwicm9sZSI6ImFkbWluIiwiZXhwIjoxNzQwMzE0ODcxfQ.QdQ5tu7njYdKVd3EVv8jAb63EjT91kjril6FBt7CTNU' \
 --header 'Content-Type: application/json' \
 --data '{
     "cluster_name": "cluster-1",
@@ -135,7 +137,7 @@ curl --location 'http://localhost:8000/create_cluster' \
 ```
 Sample Response
 ```bash
-{"message":"sucess","cluster_id":"4e171f79-1009-4830-809c-ca95fc584245"}
+{"message":"cluster has been created successfully","cluster_id":"28ba2722-a17c-4dca-a46a-5925384aef16"}
 ```
 
 
@@ -143,21 +145,21 @@ Sample Response
 Sample Request
 ```bash
 curl --location 'http://localhost:8000/create_deployment' \
---header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiY2FjMzNmNGYtNzhkNy00ZDEyLWIxYTAtOWQ2ZGY2ODIyMjJlIiwib3JnYW5pemF0aW9uX2lkIjoiYzg5NmJiYzktNTk0MC00MjA3LTk3ZmEtZmYzYjhhZDlkNjVmIiwiZXhwIjoxNzQwMjcxNjY2fQ.-K02PGV8xkrCSTPkihud2Tdhe2k5s5NsHpecAX23W1Y' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNGZjYzEzODctYmM5Ni00YTg5LTk3ODQtNGNkNDFlMjNjNDUxIiwib3JnYW5pemF0aW9uX2lkIjoiNTk3ODU3NDItMzk3OS00Y2I2LTgyYmEtMTVmODdjMGVkYTczIiwicm9sZSI6ImFkbWluIiwiZXhwIjoxNzQwMzE0ODcxfQ.QdQ5tu7njYdKVd3EVv8jAb63EjT91kjril6FBt7CTNU' \
 --header 'Content-Type: application/json' \
 --data '{
-    "cluster_id": "4e171f79-1009-4830-809c-ca95fc584245",
+    "cluster_id": "28ba2722-a17c-4dca-a46a-5925384aef16",
     "image_path": "tinyllama:latest",
-    "required_cpu": 1,
-    "required_ram": 20,
+    "required_cpu": 32,
+    "required_ram": 48,
     "required_gpu": 0,
-    "priority": 4
+    "priority": 3
 }'
 ```
 
 Sample Response
 ```bash
-{"message":"Deployment added to queue","deployment_id":"bd86c8e6-d210-419f-b1b5-4524f3e16b68"}
+{"message":"Deployment added to queue","deployment_id":"2ef2dbaf-b443-48bc-a577-5e9436c69522"}
 ```
 
 ### UML Diagram of DB

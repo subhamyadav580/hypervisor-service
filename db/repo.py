@@ -39,7 +39,7 @@ def FetchOneInDB(query: str, params):
     cursor.execute(query, params)
     data = cursor.fetchone()
     column_names = [description[0] for description in cursor.description]
-    if cursor.rowcount > 0:
+    if data and len(data) > 0:
         data = dict(zip(column_names, data))    
     else:
         data = {}
